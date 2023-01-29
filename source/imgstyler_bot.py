@@ -138,7 +138,7 @@ class Application:
             self._user_id_to_first_image[chat_id] = img
             print(f"The first image from user {chat_id} has been saved, waiting for the second one")
         else:
-            if self._style_transfer == StyleTransferType.Gatys:  # the slow one
+            if self._style_transfer_type == StyleTransferType.Gatys:  # the slow one
                 txt = "...in progress. Please wait, it may take a few minutes..."
             else:
                 txt = "...in progress. Please wait, it may take for a while..."
@@ -168,6 +168,6 @@ if __name__ == '__main__':
 
     # Choose a stile transfer here:
     # TODO make an external config and update the readme
-    style_transfer_type = StyleTransferType.MSGNet
+    style_transfer_type = StyleTransferType.Gatys
 
     Application(style_transfer_type)
