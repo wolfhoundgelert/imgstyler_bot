@@ -1,9 +1,18 @@
 ## The final project for the course "Deep Learning"
+
+&nbsp;
+
 ### Semester 1, autumn 2022 - https://stepik.org/course/124070/info
-### Participant: Andrei Polkanov
+#### Participant: Andrei Polkanov
+
+&nbsp;
+
 # Telegram Bots - Styling images in a telegram bot
 
+&nbsp;
+
 ### Task:
+
 ```
 Main part (one of two options):
 
@@ -35,20 +44,21 @@ I implemented a telegram bot which gets 2 images from a user, uses them as a con
 
 TODO screens from the bot
 
-Users can send those 2 images one after another or together. The order of sended images are meaningful - the first one is a content and the second one is a style. For example, the first image - a photo of your beloved dog or cat, the second one - an artwork of Picasso, and the result image will be a photo of your dog or cat as kind of artwork in the style of Picasso.
+Users can send those 2 images one after another or together. The order of sent images is meaningful - the first one is a content and the second one is a style. For example, the first image - a photo of your beloved dog or cat, the second one - an artwork of Picasso, and the result image will be a photo of your dog or cat as kind of artwork in the style of Picasso.
 
-It’s an educational project, but it’s in production-ready state - you can deploy it on a local machine or your web server, register your own telegram bot and receive the token, create a ‘token.txt’ file and copy the token there, and put the file to the project root folder. 
+### How to
+
+It’s an educational project, but it’s in production-ready state - you can deploy it on a local machine or your web server, register your own telegram bot and receive the token (https://core.telegram.org/bots/features#botfather), create a `token.txt` file and copy the token there, and put the file to the project root folder. 
 
 You need to resolve some dependencies, such as installing python and needed packages:
-numpy, Pillow, tqdm, torch, torchvision, tensorflow, tensorflow_hub, python-telegram-bot (maybe smth else)
+
+	numpy, Pillow, tqdm, torch, torchvision, tensorflow, tensorflow_hub, python-telegram-bot (maybe something else).
 
 Start the application by the `python -m imgstyler_bot` command in the terminal (you need to set `source` folder as a current dir in the terminal). Then you can go to the Telegram, find your bot and start an interaction with it.
 
-&nbsp;
-
 ### Style Transfer
 
-The bot now supports 4 algorithms that style your images:
+The bot now supports 4 algorithms that can be used for styling images:
 
 
 - #### Gatys
@@ -84,8 +94,6 @@ The bot now supports 4 algorithms that style your images:
  
 	https://github.com/zhanghang1989/PyTorch-Multi-Style-Transfer/blob/75d256049a6af7ceccae01bd5c472556478048ea/experiments/main.py#L108
 	
-	&nbsp;
-	
 	Dataset: http://images.cocodataset.org/zips/val2014.zip (I took a validation dataset, it’s 2 times smaller than the train one)
 
  
@@ -95,7 +103,7 @@ You can **switch the current algorithm** before running the bot in the main `img
 style_transfer_type = StyleTransferType.MSGNet
 ```
 
-I chose `MSGNet` as a default because it gives the most pleasant results in my opinion (@), and does it faster than others. Sometimes it makes some visible "brush"-patterns which slightly spoil the impression. As I chose this one as my favourite one, I also tried to train that net on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the ‘notebook’ folder, and turn it on with `MSGNetCustomTrain` style transfer type.
+I chose `MSGNet` as a default because it gives the most pleasant results in my opinion, and does it faster than others. Sometimes it makes some visible "brush"-patterns which slightly spoil the impression. As I chose this one as my favourite one, I also tried to train that net on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the `notebook` folder, and turn it on with `MSGNetCustomTrain` style transfer type.
 
 TODO screen with MSGNet
 
@@ -123,7 +131,7 @@ I also used some simple multiprocessing that allows my bot to process several re
 
 &nbsp;
 
-I’m new in Python, so please feel free to leave your comments on how it would be better to do something)
+*I’m new in Python and neural networks, so please feel free to leave your comments on how it would be better to do something)*
 
 &nbsp;
 
