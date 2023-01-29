@@ -70,7 +70,7 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	&nbsp;
 
-	![img_6.png](img_6.png) . ![img_2.png](img_2.png)
+	![img_6.png](pic/img_6.png) . ![img_2.png](pic/img_2.png)
 
 &nbsp;
 
@@ -88,7 +88,7 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	&nbsp;
 
-	![img_5.png](img_5.png) . ![img_4.png](img_4.png)
+	![img_5.png](pic/img_5.png) . ![img_4.png](pic/img_4.png)
 
 &nbsp;
 
@@ -106,7 +106,7 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	&nbsp;
 
-	![img_7.png](img_7.png) . ![img_3.png](img_3.png)
+	![img_7.png](pic/img_7.png) . ![img_3.png](pic/img_3.png)
 
 &nbsp;
 
@@ -159,7 +159,7 @@ I also used some simple multiprocessing that allows my bot to process several re
 
 &nbsp;
 
-<img alt="img_8.png" src="img_8.png" width="300"/>
+<img alt="pic/img_8.png" src="pic/img_8.png" width="300"/>
 
 I don't know the title and who the author is - I took this image from [this tutorial](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html).
 
@@ -167,13 +167,13 @@ If you know something about this amazing artwork, please let me know)
 
 &nbsp;
 
-<img alt="img_9.png" src="img_9.png" width="300"/>
+<img alt="pic/img_9.png" src="pic/img_9.png" width="300"/>
 
 [Pablo Picasso, 1909-10, Figure dans un Fauteuil (Seated Nude, Femme nue assise)](https://en.wikipedia.org/wiki/File:Pablo_Picasso,_1909-10,_Figure_dans_un_Fauteuil_%28Seated_Nude,_Femme_nue_assise%29,_oil_on_canvas,_92.1_x_73_cm,_Tate_Modern,_London.jpg)
 
 &nbsp;
 
-![img_10.png](img_10.png)
+![img_10.png](pic/img_10.png)
 
 [Sophie Harding, Leo The Lion](https://www.sophie-harding.co.uk/wp-content/uploads/2015/03/Leo-The-Lion.jpg)
 
@@ -181,7 +181,7 @@ If you know something about this amazing artwork, please let me know)
 
 &nbsp;
 
-<img alt="img_11.png" src="img_11.png" width="300"/>
+<img alt="pic/img_11.png" src="pic/img_11.png" width="300"/>
 
 Not an artwork, but meet Chertik the cat - sponsor of today's review of neural networks)
 
