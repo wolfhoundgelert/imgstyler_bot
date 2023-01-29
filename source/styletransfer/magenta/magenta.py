@@ -8,7 +8,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 from PIL import Image
 
-from source.styletransfer.styletransfer import \
+from styletransfer.styletransfer import \
     StyleTransfer, StyleTransferType, StyleTransferConfig, StyleTransferInference
 
 

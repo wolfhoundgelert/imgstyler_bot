@@ -12,9 +12,9 @@ import torchvision.models as models
 from PIL import Image
 from tqdm import tqdm
 
-from source.styletransfer.styletransfer import \
+from styletransfer.styletransfer import \
     StyleTransfer, StyleTransferType, StyleTransferConfig, StyleTransferInference
-from source.styletransfer.torchdevice import device
+from styletransfer.torchdevice import device
 
 
 class GatysConfig(StyleTransferConfig):

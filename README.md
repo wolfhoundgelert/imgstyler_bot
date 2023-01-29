@@ -42,8 +42,6 @@ Requirements: https://periwinkle-wedge-678.notion.site/tg-bots-project-4f57c3d7a
 
 I implemented a telegram bot which gets 2 images from a user, uses them as a content and a style for generating a new one, then sends the result image back to the user.
 
-TODO screens from the bot
-
 Users can send those 2 images one after another or together. The order of sent images is meaningful - the first one is a content and the second one is a style. For example, the first image - a photo of your beloved dog or cat, the second one - an artwork of Picasso, and the result image will be a photo of your dog or cat as kind of artwork in the style of Picasso.
 
 ### How to
@@ -60,13 +58,21 @@ Start the application by the `python -m imgstyler_bot` command in the terminal (
 
 The bot now supports 4 algorithms that can be used for styling images:
 
-
 - #### Gatys
 
 	https://arxiv.org/abs/1508.06576
  
 	https://pytorch.org/tutorials/advanced/neural_style_tutorial.html
 
+	&nbsp;
+ 
+	`Gatys` is the classic, which gave a tangible impetus to the development of style transfer at its time. Great work! And it gives excellent results. But it’s slow - on my laptop the computations sometimes took up to several minutes. Anyway, it must have to be studied deeply for educational purposes.
+
+	&nbsp;
+
+	![img_6.png](img_6.png) . ![img_2.png](img_2.png)
+
+&nbsp;
 
 - #### MSGNet
 
@@ -76,7 +82,15 @@ The bot now supports 4 algorithms that can be used for styling images:
 	
 	https://github.com/zhanghang1989/PyTorch-Multi-Style-Transfer/blob/master/msgnet.ipynb
 
+	&nbsp;
 
+	`MSGNet` is the fastest on my laptop and somtimes gives interest results, but it's also often makes some visible "brush"-patterns or fails with colors.
+
+	&nbsp;
+
+	![img_5.png](img_5.png) . ![img_4.png](img_4.png)
+
+&nbsp;
 
 - #### Magenta
 
@@ -86,9 +100,17 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	https://towardsdatascience.com/fast-neural-style-transfer-in-5-minutes-with-tensorflow-hub-magenta-110b60431dcc
 
+	&nbsp;
 
+	`Magenta` - fast enough, but a bit slower than `MSGNet` and also has its issues - tends to over-patternize the image.
 
-- #### MSGNetCustomTrain - my own attempt to train MSGNet
+	&nbsp;
+
+	![img_7.png](img_7.png) . ![img_3.png](img_3.png)
+
+&nbsp;
+
+- #### MSGNetCustomTrain
 
 	https://github.com/wolfhoundgelert/imgstyler_bot/tree/master/notebook 
  
@@ -96,26 +118,24 @@ The bot now supports 4 algorithms that can be used for styling images:
 	
 	Dataset: http://images.cocodataset.org/zips/val2014.zip (I took a validation dataset, it’s 2 times smaller than the train one)
 
- 
+	&nbsp;
+
+	`MSGNetCustomTrain` is my attempt at `MSGNet` training on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the `notebook` folder, and turn it on with  style transfer type.
+
+	&nbsp;
+
+	TODO image . TODO image
+
+&nbsp;
+
+*As we can see here it's not an easy walk to find some universal algorithm or neural network for any task and person - they all have their pros and cons. It's a matter of trading between speed, stability and subjective satisfaction.*
+
+&nbsp;
 
 You can **switch the current algorithm** before running the bot in the main `imgstyler_bot.py` file:
 ```
-style_transfer_type = StyleTransferType.MSGNet
+style_transfer_type = StyleTransferType.Gatys
 ```
-
-I chose `MSGNet` as a default because it gives the most pleasant results in my opinion, and does it faster than others. Sometimes it makes some visible "brush"-patterns which slightly spoil the impression. As I chose this one as my favourite one, I also tried to train that net on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the `notebook` folder, and turn it on with `MSGNetCustomTrain` style transfer type.
-
-TODO screen with MSGNet
-
-TODO screen with MSGNetCustomTrain 
-
-`Gatys` is the classic, which gave a tangible impetus to the development of style transfer at its time. Great work! And it gives excellent results. But it’s slow - on my laptop the computations sometimes took up to several minutes. Anyway, it must have to be studied deeply for educational purposes.
-
-TODO screen with Gatys
-
-`Magenta` - fast enough, but slower than `MSGNet` and, as for me, does not give such nice results (there might be an issue in my implementation).
-
-TODO screen with Magenta
 
 &nbsp;
 
@@ -134,5 +154,38 @@ I also used some simple multiprocessing that allows my bot to process several re
 *I’m new in Python and neural networks, so please feel free to leave your comments on how it would be better to do something)*
 
 &nbsp;
+
+### Artwork
+
+&nbsp;
+
+<img alt="img_8.png" src="img_8.png" width="300"/>
+
+I don't know the title and who the author is - I took this image from [this tutorial](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html).
+
+If you know something about this amazing artwork, please let me know)
+
+&nbsp;
+
+<img alt="img_9.png" src="img_9.png" width="300"/>
+
+[Pablo Picasso, 1909-10, Figure dans un Fauteuil (Seated Nude, Femme nue assise)](https://en.wikipedia.org/wiki/File:Pablo_Picasso,_1909-10,_Figure_dans_un_Fauteuil_%28Seated_Nude,_Femme_nue_assise%29,_oil_on_canvas,_92.1_x_73_cm,_Tate_Modern,_London.jpg)
+
+&nbsp;
+
+![img_10.png](img_10.png)
+
+[Sophie Harding, Leo The Lion](https://www.sophie-harding.co.uk/wp-content/uploads/2015/03/Leo-The-Lion.jpg)
+
+Сheck out more of her adorable work on her website - https://www.sophie-harding.co.uk/
+
+&nbsp;
+
+<img alt="img_11.png" src="img_11.png" width="300"/>
+
+Not an artwork, but meet Chertik the cat - sponsor of today's review of neural networks)
+
+&nbsp;
+
 
 :=+]
