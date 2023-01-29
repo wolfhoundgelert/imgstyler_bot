@@ -157,33 +157,31 @@ I also used some simple multiprocessing that allows my bot to process several re
 
 ### Artwork
 
-&nbsp;
+<img alt="pic/img_8.png" src="pic/img_8.png" width="128"/>
 
-<img alt="pic/img_8.png" src="pic/img_8.png" width="300"/>
+<sub>I don't know the title and who the author is - I took this image from [this tutorial](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html).</sub>
 
-I don't know the title and who the author is - I took this image from [this tutorial](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html).
-
-If you know something about this amazing artwork, please let me know)
+<sup>If you know something about this amazing artwork, please let me know)</sup>
 
 &nbsp;
 
-<img alt="pic/img_9.png" src="pic/img_9.png" width="300"/>
+<img alt="pic/img_9.png" src="pic/img_9.png" width="128"/>
 
-[Pablo Picasso, 1909-10, Figure dans un Fauteuil (Seated Nude, Femme nue assise)](https://en.wikipedia.org/wiki/File:Pablo_Picasso,_1909-10,_Figure_dans_un_Fauteuil_%28Seated_Nude,_Femme_nue_assise%29,_oil_on_canvas,_92.1_x_73_cm,_Tate_Modern,_London.jpg)
-
-&nbsp;
-
-![img_10.png](pic/img_10.png)
-
-[Sophie Harding, Leo The Lion](https://www.sophie-harding.co.uk/wp-content/uploads/2015/03/Leo-The-Lion.jpg)
-
-Сheck out more of her adorable work on her website - https://www.sophie-harding.co.uk/
+<sub>[Pablo Picasso, 1909-10, Figure dans un Fauteuil (Seated Nude, Femme nue assise)](https://en.wikipedia.org/wiki/File:Pablo_Picasso,_1909-10,_Figure_dans_un_Fauteuil_%28Seated_Nude,_Femme_nue_assise%29,_oil_on_canvas,_92.1_x_73_cm,_Tate_Modern,_London.jpg)</sub>
 
 &nbsp;
 
-<img alt="pic/img_11.png" src="pic/img_11.png" width="300"/>
+<img alt="img_10.png" height="128" src="pic/img_10.png"/>
 
-Not an artwork, but meet Chertik the cat - sponsor of today's review of neural networks)
+<sub>[Sophie Harding, Leo The Lion](https://www.sophie-harding.co.uk/wp-content/uploads/2015/03/Leo-The-Lion.jpg)</sub>
+
+<sup>Сheck out more of her adorable work on her website - https://www.sophie-harding.co.uk/ </sup>
+
+&nbsp;
+
+<img alt="pic/img_11.png" src="pic/img_11.png" width="128"/>
+
+<sub>Not an artwork, but meet Chertik the cat - sponsor of today's review of neural networks)</sub>
 
 &nbsp;
 
