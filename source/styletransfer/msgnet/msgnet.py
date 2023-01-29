@@ -11,7 +11,7 @@ from torch.autograd import Variable
 
 from PIL import Image
 
-from source.styletransfer.styletransfer import \
+from styletransfer.styletransfer import \
     StyleTransfer, StyleTransferType, StyleTransferConfig, StyleTransferInference
 
 # TODO implement cuda - https://github.com/zhanghang1989/PyTorch-Multi-Style-Transfer/blob/75d256049a6af7ceccae01bd5c472556478048ea/experiments/main.py#L252

@@ -61,7 +61,7 @@ class Application:
 
             from styletransfer.msgnet.msgnet import MSGNet, MSGNetConfig
 
-            model_path = 'styletransfer/msgnet/'
+            model_path = './styletransfer/msgnet/'
             model_path += '21styles.model' if self._style_transfer_type == StyleTransferType.MSGNet \
                                             else 'my9styles.model'
 
