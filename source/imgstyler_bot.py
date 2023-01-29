@@ -167,6 +167,7 @@ if __name__ == '__main__':
     )
 
     # Choose a stile transfer here:
+    # TODO make an external config and update the readme
     style_transfer_type = StyleTransferType.MSGNet
 
     Application(style_transfer_type)
