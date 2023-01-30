@@ -221,13 +221,13 @@ class MSGNetInference(StyleTransferInference):
         if size is not None:
             if keep_asp:
                 size2 = int(size * 1.0 / img.size[0] * img.size[1])
-                img = img.resize((size, size2), Image.ANTIALIAS)
+                img = img.resize((size, size2), Image.Resampling.LANCZOS)
             else:
-                img = img.resize((size, size), Image.ANTIALIAS)
+                img = img.resize((size, size), Image.Resampling.LANCZOS)
 
         elif scale is not None:
             img = img.resize((int(img.size[0] / scale), int(img.size[1] / scale)),
-                             Image.ANTIALIAS)
+                             Image.Resampling.LANCZOS)
         img = np.array(img).transpose(2, 0, 1)
         img = torch.from_numpy(img).float().unsqueeze(0)
         return img
@@ -277,6 +277,7 @@ class MSGNetInference(StyleTransferInference):
 
     def _inference(self) -> Image:
         config = self._config
+        self._prepare_images()
         content = MSGNetInference.image_to_tensor(
             self._content_image, size=config.image_size, keep_asp=config.keep_content_aspect_ratio)
         style = MSGNetInference.image_to_tensor(self._style_image, size=config.image_size)

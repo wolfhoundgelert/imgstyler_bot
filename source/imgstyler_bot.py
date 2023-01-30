@@ -63,7 +63,7 @@ class Application:
 
             model_path = './styletransfer/msgnet/'
             model_path += '21styles.model' if self._style_transfer_type == StyleTransferType.MSGNet \
-                                            else 'my9styles.model'
+                                            else 'my21styles.model'
 
             config = MSGNetConfig(model_path=model_path)
 
