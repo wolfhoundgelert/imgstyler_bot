@@ -35,7 +35,7 @@ class StyleTransferInference:
     def _resize_image(self, image: Image, ref: Image = None):
         if ref:
             w, h = ref.size
-            return image.resize((w, h), Image.ANTIALIAS)
+            return image.resize((w, h), Image.Resampling.LANCZOS)
 
         size = self._config.image_size
         if self._config.keep_content_aspect_ratio:
@@ -43,9 +43,9 @@ class StyleTransferInference:
             ar = w / h
             w = size if ar >= 1 else int(size * ar)
             h = size if ar <= 1 else int(size / ar)
-            image = image.resize((w, h), Image.ANTIALIAS)
+            image = image.resize((w, h), Image.Resampling.LANCZOS)
         else:
-            image = image.resize((size, size), Image.ANTIALIAS)
+            image = image.resize((size, size), Image.Resampling.LANCZOS)
         return image
 
     def _prepare_images(self):

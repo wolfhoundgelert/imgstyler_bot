@@ -54,6 +54,22 @@ You need to resolve some dependencies, such as installing python and needed pack
 
 Start the application by the `python -m imgstyler_bot` command in the terminal (you need to set `source` folder as a current dir in the terminal). Then you can go to the Telegram, find your bot and start an interaction with it.
 
+### Structure
+
+- `notebook` - this folder contains Jupyter notebooks with the `MSGNet` model training process;
+  - `images` - these images (in sub-folders) are necessary for training `MSGNet` model;
+- `pic` - contains images for README.md;
+- `source`- the main development folder, the root of application code;
+  - `styletransfer` - the package with different style transfers;
+    - `gatys` - described below;
+    - `magenta` - described below;
+    - `msgnet` - described below;
+    - `styletransfer.py` - contains base classes for all style transfers. You can add your own style transfers simply by inheriting their classes from the base ones;
+    - `torchdevice.py` - just small util;
+  - `imgstyler_bot.py` - the main application module, entry point for the application;
+  - `test_.py` - unit tests on `pytest` framework - https://docs.pytest.org/en/latest/;
+- `token.txt` - !!! you should put your own token on this level alongside of `source` folder !!!;
+
 ### Style Transfer
 
 The bot now supports 4 algorithms that can be used for styling images:
