@@ -44,6 +44,8 @@ I implemented a telegram bot which gets 2 images from a user, uses them as a con
 
 Users can send those 2 images one after another or together. The order of sent images is meaningful - the first one is a content and the second one is a style. For example, the first image - a photo of your beloved dog or cat, the second one - an artwork of Picasso, and the result image will be a photo of your dog or cat as kind of artwork in the style of Picasso.
 
+&nbsp;
+
 ### How to
 
 It’s an educational project, but it’s in production-ready state - you can deploy it on a local machine or your web server, register your own telegram bot and receive the token (https://core.telegram.org/bots/features#botfather), create a `token.txt` file and copy the token there, and put the file to the project root folder. 
@@ -53,6 +55,8 @@ You need to resolve some dependencies, such as installing python and needed pack
 	numpy, Pillow, tqdm, torch, torchvision, tensorflow, tensorflow_hub, python-telegram-bot (maybe something else).
 
 Start the application by the `python -m imgstyler_bot` command in the terminal (you need to set `source` folder as a current dir in the terminal). Then you can go to the Telegram, find your bot and start an interaction with it.
+
+&nbsp;
 
 ### Structure
 
@@ -70,9 +74,13 @@ Start the application by the `python -m imgstyler_bot` command in the terminal (
   - `test_.py` - unit tests on `pytest` framework - https://docs.pytest.org/en/latest/;
 - `token.txt` - !!! you should put your own token on this level alongside of `source` folder !!!;
 
+&nbsp;
+
 ### Style Transfer
 
 The bot now supports 4 algorithms that can be used for styling images:
+
+&nbsp;
 
 - #### Gatys
 
