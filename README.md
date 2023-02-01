@@ -98,7 +98,7 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	`MSGNetCustomTrain` is my attempt at `MSGNet` training on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the `notebook` folder, and turn it on with style transfer type.
 
-	<img alt="img.png" height="400" src="img.png"/> <img alt="img_1.png" height="400" src="img_1.png"/>
+	<img alt="img.png" height="400" src="pic/img.png"/> <img alt="img_1.png" height="400" src="pic/img_1.png"/>
 
 *It's not an easy walk to find some universal algorithm or neural network for any task and person - they all have their pros and cons. It's a matter of trading between speed, stability and subjective satisfaction.*
 
