@@ -51,7 +51,8 @@ Start the application by the `python -m imgstyler_bot` command in the terminal (
     - `torchdevice.py` - just small util;
   - `imgstyler_bot.py` - the main application module, entry point for the application;
   - `test_.py` - unit tests on `pytest` framework - https://docs.pytest.org/en/latest/;
-- `requirements.txt` - configuration of needed packages
+- `Dockerfile` - Docker config;
+- `requirements.txt` - configuration of needed packages;
 - `token.txt` - !!! you should put your own token on this level alongside of `source` folder !!!;
 
 ### Style Transfer
@@ -95,9 +96,9 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	Dataset: http://images.cocodataset.org/zips/val2014.zip (I took a validation dataset, it’s 2 times smaller than the train one)
 
-	`MSGNetCustomTrain` is my attempt at `MSGNet` training on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the `notebook` folder, and turn it on with  style transfer type.
+	`MSGNetCustomTrain` is my attempt at `MSGNet` training on my own, but my results weren't as good as the original ones because the training requires a lot of computational resources. You can find my adapted notebooks with my tries in the `notebook` folder, and turn it on with style transfer type.
 
-	TODO image TODO image
+	<img alt="img.png" height="400" src="img.png"/> <img alt="img_1.png" height="400" src="img_1.png"/>
 
 *It's not an easy walk to find some universal algorithm or neural network for any task and person - they all have their pros and cons. It's a matter of trading between speed, stability and subjective satisfaction.*
 
