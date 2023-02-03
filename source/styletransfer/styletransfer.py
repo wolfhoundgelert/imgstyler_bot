@@ -13,7 +13,7 @@ class StyleTransferType:
 class StyleTransferConfig:
 
     def __init__(self,
-                 image_size: int = 512,
+                 image_size: int = 256,
                  keep_content_aspect_ratio: bool = True
                  ):
 

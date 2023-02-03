@@ -5,9 +5,9 @@
 
 import numpy as np
 
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
+from torch import Tensor, bmm, from_numpy, chunk, cat, load, device
+from torch.nn import Module, Parameter, ReflectionPad2d, Sequential, Conv2d, ReLU, Upsample, BatchNorm2d, InstanceNorm2d
+from torch.autograd.variable import Variable
 
 from PIL import Image
 
@@ -21,7 +21,7 @@ from styletransfer.styletransfer import \
 class MSGNetConfig(StyleTransferConfig):
 
     def __init__(self,
-                 image_size: int = 512,
+                 image_size: int = 256,
                  keep_content_aspect_ratio: bool = True,
                  model_path: str = './styletransfer/msgnet/21styles.model',
                  ):
@@ -31,7 +31,7 @@ class MSGNetConfig(StyleTransferConfig):
 
 
 # define Gram Matrix
-class GramMatrix(nn.Module):
+class GramMatrix(Module):
     def forward(self, y):
         (b, ch, h, w) = y.size()
         features = y.view(b, ch, w * h)
@@ -41,7 +41,7 @@ class GramMatrix(nn.Module):
 
 
 # proposed Inspiration(CoMatch) Layer
-class Inspiration(nn.Module):
+class Inspiration(Module):
     """ Inspiration Layer (from MSG-Net paper)
     tuning the featuremap with target Gram Matrix
     ref https://arxiv.org/abs/1703.06953
@@ -49,9 +49,9 @@ class Inspiration(nn.Module):
     def __init__(self, C, B=1):
         super().__init__()
         # B is equal to 1 or input mini_batch
-        self.weight = nn.Parameter(torch.Tensor(1, C, C), requires_grad=True)
+        self.weight = Parameter(Tensor(1, C, C), requires_grad=True)
         # non-parameter buffer
-        self.G = Variable(torch.Tensor(B, C, C), requires_grad=True)
+        self.G = Variable(Tensor(B, C, C), requires_grad=True)
         self.C = C
         self.reset_parameters()
 
@@ -63,8 +63,8 @@ class Inspiration(nn.Module):
 
     def forward(self, X):
         # input X is a 3D feature map
-        self.P = torch.bmm(self.weight.expand_as(self.G), self.G)
-        return torch.bmm(self.P.transpose(1, 2).expand(X.size(0), self.C, self.C),
+        self.P = bmm(self.weight.expand_as(self.G), self.G)
+        return bmm(self.P.transpose(1, 2).expand(X.size(0), self.C, self.C),
                          X.view(X.size(0), X.size(1), -1)).view_as(X)
 
     def __repr__(self):
@@ -72,12 +72,12 @@ class Inspiration(nn.Module):
 
 
 # some basic layers, with reflectance padding
-class ConvLayer(torch.nn.Module):
+class ConvLayer(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride):
         super().__init__()
         reflection_padding = kernel_size // 2
-        self.reflection_pad = nn.ReflectionPad2d(reflection_padding)
-        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+        self.reflection_pad = ReflectionPad2d(reflection_padding)
+        self.conv2d = Conv2d(in_channels, out_channels, kernel_size, stride)
 
     def forward(self, x):
         out = self.reflection_pad(x)
@@ -85,17 +85,17 @@ class ConvLayer(torch.nn.Module):
         return out
 
 
-class UpsampleConvLayer(torch.nn.Module):
+class UpsampleConvLayer(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride,
                  upsample=None):
         super().__init__()
         self.upsample = upsample
         if upsample:
-            self.upsample_layer = torch.nn.Upsample(scale_factor=upsample)
+            self.upsample_layer = Upsample(scale_factor=upsample)
         self.reflection_padding = kernel_size // 2
         if self.reflection_padding != 0:
-            self.reflection_pad = nn.ReflectionPad2d(self.reflection_padding)
-        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+            self.reflection_pad = ReflectionPad2d(self.reflection_padding)
+        self.conv2d = Conv2d(in_channels, out_channels, kernel_size, stride)
 
     def forward(self, x):
         if self.upsample:
@@ -106,31 +106,31 @@ class UpsampleConvLayer(torch.nn.Module):
         return out
 
 
-class Bottleneck(nn.Module):
+class Bottleneck(Module):
     """ Pre-activation residual block
     Identity Mapping in Deep Residual Networks
     ref https://arxiv.org/abs/1603.05027
     """
     def __init__(self, inplanes, planes, stride=1, downsample=None,
-                 norm_layer=nn.BatchNorm2d):
+                 norm_layer=BatchNorm2d):
         super().__init__()
         self.expansion = 4
         self.downsample = downsample
         if self.downsample is not None:
-            self.residual_layer = nn.Conv2d(inplanes, planes*self.expansion,
+            self.residual_layer = Conv2d(inplanes, planes*self.expansion,
                                             kernel_size=1, stride=stride)
         conv_block = []
         conv_block += [norm_layer(inplanes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+                       ReLU(inplace=True),
+                       Conv2d(inplanes, planes, kernel_size=1, stride=1)]
         conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
+                       ReLU(inplace=True),
                        ConvLayer(planes, planes, kernel_size=3, stride=stride)]
         conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(planes, planes*self.expansion, kernel_size=1,
+                       ReLU(inplace=True),
+                       Conv2d(planes, planes*self.expansion, kernel_size=1,
                                  stride=1)]
-        self.conv_block = nn.Sequential(*conv_block)
+        self.conv_block = Sequential(*conv_block)
 
     def forward(self, x):
         if self.downsample is not None:
@@ -140,12 +140,12 @@ class Bottleneck(nn.Module):
         return residual + self.conv_block(x)
 
 
-class UpBottleneck(nn.Module):
+class UpBottleneck(Module):
     """ Up-sample residual block (from MSG-Net paper)
     Enables passing identity all the way through the generator
     ref https://arxiv.org/abs/1703.06953
     """
-    def __init__(self, inplanes, planes, stride=2, norm_layer=nn.BatchNorm2d):
+    def __init__(self, inplanes, planes, stride=2, norm_layer=BatchNorm2d):
         super().__init__()
         self.expansion = 4
         self.residual_layer = UpsampleConvLayer(inplanes, planes*self.expansion,
@@ -153,26 +153,26 @@ class UpBottleneck(nn.Module):
                                                 upsample=stride)
         conv_block = []
         conv_block += [norm_layer(inplanes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+                       ReLU(inplace=True),
+                       Conv2d(inplanes, planes, kernel_size=1, stride=1)]
         conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
+                       ReLU(inplace=True),
                        UpsampleConvLayer(planes, planes, kernel_size=3,
                                          stride=1, upsample=stride)]
         conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(planes, planes*self.expansion, kernel_size=1,
+                       ReLU(inplace=True),
+                       Conv2d(planes, planes*self.expansion, kernel_size=1,
                                  stride=1)]
-        self.conv_block = nn.Sequential(*conv_block)
+        self.conv_block = Sequential(*conv_block)
 
     def forward(self, x):
         return self.residual_layer(x) + self.conv_block(x)
 
 
 # the MSG-Net
-class Net(nn.Module):
+class Net(Module):
     def __init__(self, input_nc=3, output_nc=3, ngf=64,
-                 norm_layer=nn.InstanceNorm2d, n_blocks=6, gpu_ids=[]):
+                 norm_layer=InstanceNorm2d, n_blocks=6, gpu_ids=[]):
         super().__init__()
         self.gpu_ids = gpu_ids
         self.gram = GramMatrix()
@@ -184,10 +184,10 @@ class Net(nn.Module):
         model1 = []
         model1 += [ConvLayer(input_nc, 64, kernel_size=7, stride=1),
                    norm_layer(64),
-                   nn.ReLU(inplace=True),
+                   ReLU(inplace=True),
                    block(64, 32, 2, 1, norm_layer),
                    block(32*expansion, ngf, 2, 1, norm_layer)]
-        self.model1 = nn.Sequential(*model1)
+        self.model1 = Sequential(*model1)
 
         model = []
         self.ins = Inspiration(ngf*expansion)
@@ -200,10 +200,10 @@ class Net(nn.Module):
         model += [upblock(ngf*expansion, 32, 2, norm_layer),
                   upblock(32*expansion, 16, 2, norm_layer),
                   norm_layer(16*expansion),
-                  nn.ReLU(inplace=True),
+                  ReLU(inplace=True),
                   ConvLayer(16*expansion, output_nc, kernel_size=7, stride=1)]
 
-        self.model = nn.Sequential(*model)
+        self.model = Sequential(*model)
 
     def setTarget(self, Xs):
         f = self.model1(Xs)
@@ -218,43 +218,33 @@ class MSGNetInference(StyleTransferInference):
 
     @staticmethod
     def image_to_tensor(img, size=None, scale=None, keep_asp=False):
-        if size is not None:
-            if keep_asp:
-                size2 = int(size * 1.0 / img.size[0] * img.size[1])
-                img = img.resize((size, size2), Image.Resampling.LANCZOS)
-            else:
-                img = img.resize((size, size), Image.Resampling.LANCZOS)
-
-        elif scale is not None:
-            img = img.resize((int(img.size[0] / scale), int(img.size[1] / scale)),
-                             Image.Resampling.LANCZOS)
         img = np.array(img).transpose(2, 0, 1)
-        img = torch.from_numpy(img).float().unsqueeze(0)
+        img = from_numpy(img).float().unsqueeze(0)
         return img
 
     @staticmethod
     def preprocess_batch(batch):
         batch = batch.transpose(0, 1)
-        (r, g, b) = torch.chunk(batch, 3)
-        batch = torch.cat((b, g, r))
+        (r, g, b) = chunk(batch, 3)
+        batch = cat((b, g, r))
         batch = batch.transpose(0, 1)
         return batch
 
     @staticmethod
-    def tensor_to_rgbimage(tensor, cuda=False):
+    def tensor_to_rgbimage(tnsr, cuda=False):
         if cuda:
-            img = tensor.clone().cpu().clamp(0, 255).numpy()
+            img = tnsr.clone().cpu().clamp(0, 255).numpy()
         else:
-            img = tensor.clone().clamp(0, 255).numpy()
+            img = tnsr.clone().clamp(0, 255).numpy()
         img = img.transpose(1, 2, 0).astype('uint8')
         img = Image.fromarray(img)
         return img
 
     @staticmethod
-    def tensor_to_image(tensor, cuda=False):
-        (b, g, r) = torch.chunk(tensor, 3)
-        tensor = torch.cat((r, g, b))
-        img = MSGNetInference.tensor_to_rgbimage(tensor, cuda)
+    def tensor_to_image(tnsr, cuda=False):
+        (b, g, r) = chunk(tnsr, 3)
+        tnsr = cat((r, g, b))
+        img = MSGNetInference.tensor_to_rgbimage(tnsr, cuda)
         return img
 
     def __init__(self, config: MSGNetConfig, content_image: Image, style_image: Image, model_dict):
@@ -278,8 +268,10 @@ class MSGNetInference(StyleTransferInference):
     def _inference(self) -> Image:
         config = self._config
         self._prepare_images()
+
         content = MSGNetInference.image_to_tensor(
             self._content_image, size=config.image_size, keep_asp=config.keep_content_aspect_ratio)
+
         style = MSGNetInference.image_to_tensor(self._style_image, size=config.image_size)
         style = MSGNetInference.preprocess_batch(style)
 
@@ -297,7 +289,7 @@ class MSGNet(StyleTransfer):
         super().__init__(config)
 
         # TODO Support cuda
-        self._model_dict = torch.load(self._config.model_path, map_location=torch.device('cpu'))
+        self._model_dict = load(self._config.model_path, map_location=device('cpu'))
 
     def get_default_config(self):
         return MSGNetConfig()

@@ -1,12 +1,12 @@
 import logging
 import threading
-import multiprocessing
+from multiprocessing import Manager, Process
 from os import getpid
 from telegram import Update
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes
 from io import BytesIO
 from PIL import Image
-import requests
+from requests import post
 
 from styletransfer.styletransfer import StyleTransferType, StyleTransfer, StyleTransferInference, StyleTransferConfig
 
@@ -37,9 +37,8 @@ class Application:
         # style transfer part:
         self._style_transfer_type = style_transfer_type
         self._user_id_to_first_image = {}  # dict for saving the first photo from a user (we need 2 photos)
-        self._pid_to_result = multiprocessing.Manager().dict()  # dict for saving results via multiprocessing
+        self._pid_to_result = Manager().dict()  # dict for saving results via multiprocessing
         self._pid_to_chat_id = {}  # dict for saving chat id via multiprocessing for sending results back to users
-        self._timer = None  # check results by timer via multiprocessing
         self._style_transfer = self._build_style_transfer()
 
         # telegram bot part:
@@ -86,18 +85,21 @@ class Application:
 
     def _check_results(self):
         for pid in self._pid_to_result.keys():
-            result = self._pid_to_result.pop(pid)
+
+            try:  # TODO Sometimes failed with KeyError only in the Docker containers (pops pid from empty keys list)
+                result = self._pid_to_result.pop(pid)
+            except:
+                pass
+
             chat_id = self._pid_to_chat_id.pop(pid)
             self._send_image_to_chat(result, chat_id)
 
-        if len(self._pid_to_result.keys()):
-            self._check_results()
-        elif len(self._pid_to_chat_id.keys()):
+        if len(self._pid_to_result.keys()) or len(self._pid_to_chat_id.keys()):
             self._start_timer()
 
     def _start_timer(self):
-        self._timer = threading.Timer(1, self._check_results)
-        self._timer.start()
+        threading.Timer(1, self._check_results).start()
+
 
     def _send_image_to_chat(self, result, chat_id):
         bio = BytesIO()
@@ -108,7 +110,7 @@ class Application:
         files = {"photo": bio}
 
         try:
-            response = requests.post(api_url, files=files)
+            response = post(api_url, files=files)
             print(f"Response: {response.text}")
         except Exception as e:
             print(f"Exception: {e}")
@@ -152,7 +154,7 @@ class Application:
             inference_worker = InferenceWorker.get_worker(
                 self._style_transfer, self._pid_to_result, content_image, style_image)
 
-            p = multiprocessing.Process(target=inference_worker)
+            p = Process(target=inference_worker)
             p.start()
             self._pid_to_chat_id[p.pid] = chat_id
 
@@ -168,6 +170,6 @@ if __name__ == '__main__':
 
     # Choose a stile transfer here:
     # TODO make an external config and update the readme
-    style_transfer_type = StyleTransferType.MSGNet
+    style_transfer_type = StyleTransferType.Gatys
 
     Application(style_transfer_type)

@@ -1,20 +1,21 @@
 # Source: https://arxiv.org/abs/1508.06576
 # Source: https://pytorch.org/tutorials/advanced/neural_style_tutorial.html
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-
-import torchvision.transforms as transforms
-import torchvision.models as models
+from torch import mm
+from torch import tensor
+from torch import no_grad
+from torch.nn import Module, Sequential, Conv2d, ReLU, MaxPool2d
+from torch.nn.functional import mse_loss
+from torch.optim import LBFGS
+from torchvision.transforms import ToPILImage, ToTensor
+from torchvision.models.vgg import vgg19, VGG19_Weights
 
 from PIL import Image
 from tqdm import tqdm
 
 from styletransfer.styletransfer import \
     StyleTransfer, StyleTransferType, StyleTransferConfig, StyleTransferInference
-from styletransfer.torchdevice import device
+# from styletransfer.torchdevice import device
 
 
 class GatysConfig(StyleTransferConfig):
@@ -40,7 +41,7 @@ class GatysConfig(StyleTransferConfig):
         self.content_weight = content_weight
 
 
-class ContentLoss(nn.Module):
+class ContentLoss(Module):
 
     def __init__(self, target):
         super(ContentLoss, self).__init__()
@@ -51,11 +52,11 @@ class ContentLoss(nn.Module):
         self.target = target.detach()
 
     def forward(self, input):
-        self.loss = F.mse_loss(input, self.target)
+        self.loss = mse_loss(input, self.target)
         return input
 
 
-class StyleLoss(nn.Module):
+class StyleLoss(Module):
 
     @staticmethod
     def gram_matrix(target):
@@ -65,7 +66,7 @@ class StyleLoss(nn.Module):
 
         features = target.view(a * b, c * d)  # resize F_XL into \hat F_XL
 
-        G = torch.mm(features, features.t())  # compute the gram product
+        G = mm(features, features.t())  # compute the gram product
 
         # we 'normalize' the values of the gram matrix
         # by dividing by the number of element in each feature maps.
@@ -77,15 +78,15 @@ class StyleLoss(nn.Module):
 
     def forward(self, input):
         G = StyleLoss.gram_matrix(input)
-        self.loss = F.mse_loss(G, self.target)
+        self.loss = mse_loss(G, self.target)
         return input
 
 
 # create a module to normalize input image so we can easily put it in a nn.Sequential
-class Normalization(nn.Module):
+class Normalization(Module):
 
-    cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
-    cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
+    cnn_normalization_mean = tensor([0.485, 0.456, 0.406])  # .to(device)
+    cnn_normalization_std = tensor([0.229, 0.224, 0.225])  # .to(device)
 
     def __init__(self):
         super(Normalization, self).__init__()
@@ -103,22 +104,23 @@ class GatysInference(StyleTransferInference):
 
     @staticmethod
     def _image_to_tensor(image: Image):
-        tensor = GatysInference._image_to_tensor_transform(image).unsqueeze(0).to(device)
-        return tensor
+        tnsr = GatysInference._image_to_tensor_transform(image).unsqueeze(0)  # .to(device)
+        return tnsr
 
     @staticmethod
-    def _tensor_to_image(tensor):
-        trs = transforms.ToPILImage()
-        tensor = tensor.cpu().clone()  # We clone the tensor to not do changes on it
-        img = trs(tensor.squeeze(0))  # Remove the fake batch dimension, then transform
+    def _tensor_to_image(tnsr):
+        trs = ToPILImage()
+        tnsr = tnsr.cpu().clone()  # We clone the tensor to not do changes on it
+        img = trs(tnsr.squeeze(0))  # Remove the fake batch dimension, then transform
         return img
 
-    _image_to_tensor_transform = transforms.ToTensor()
+    _image_to_tensor_transform = ToTensor()
 
-    _vgg19 = models.vgg19(weights=models.vgg.VGG19_Weights.DEFAULT).features.to(device).eval()
+    _vgg19 = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()  # .to(device).eval()
 
     def __init__(self, config: GatysConfig, content_image: Image, style_image: Image):
         super().__init__(config, content_image, style_image)
+        self._config = config  # resolve self._config as GatysConfig (not as StyleTransferConfig)
 
         # TODO refactor without self. variables (make computation methods static, keep only inheritance)
         self._content = None
@@ -141,7 +143,7 @@ class GatysInference(StyleTransferInference):
         cnn = GatysInference._vgg19
 
         # normalization module
-        normalization = Normalization().to(device)
+        normalization = Normalization()  # .to(device)
 
         # just in order to have iterable access to or list of content/style
         # losses
@@ -150,23 +152,21 @@ class GatysInference(StyleTransferInference):
 
         # assuming that cnn is a nn.Sequential, so we make a new nn.Sequential
         # to put in modules that are supposed to be activated sequentially
-        model = nn.Sequential(normalization)
+        model = Sequential(normalization)
 
         i = 0  # increment every time we see a conv
         for layer in cnn.children():
-            if isinstance(layer, nn.Conv2d):
+            if isinstance(layer, Conv2d):
                 i += 1
                 name = 'conv_{}'.format(i)
-            elif isinstance(layer, nn.ReLU):
+            elif isinstance(layer, ReLU):
                 name = 'relu_{}'.format(i)
                 # The in-place version doesn't play very nicely with the ContentLoss
                 # and StyleLoss we insert below. So we replace with out-of-place
                 # ones here.
-                layer = nn.ReLU(inplace=False)
-            elif isinstance(layer, nn.MaxPool2d):
+                layer = ReLU(inplace=False)
+            elif isinstance(layer, MaxPool2d):
                 name = 'pool_{}'.format(i)
-            elif isinstance(layer, nn.BatchNorm2d):
-                name = 'bn_{}'.format(i)
             else:
                 raise RuntimeError('Unrecognized layer: {}'.format(layer.__class__.__name__))
 
@@ -199,7 +199,7 @@ class GatysInference(StyleTransferInference):
 
     def _get_input_optimizer(self):
         # this line to show that input is a parameter that requires a gradient
-        optimizer = optim.LBFGS([self._input], max_iter=1)
+        optimizer = LBFGS([self._input], max_iter=1)
         return optimizer
 
     def _run_style_transfer(self):
@@ -221,7 +221,7 @@ class GatysInference(StyleTransferInference):
 
             def closure():
                 # correct the values of updated input image
-                with torch.no_grad():
+                with no_grad():
                     self._input.clamp_(0, 1)
 
                 optimizer.zero_grad()
@@ -257,7 +257,7 @@ class GatysInference(StyleTransferInference):
                f"({self._config.loss_convergence_threshold}) or number of steps ({self._config.num_steps})\n"))
 
         # a last correction...
-        with torch.no_grad():
+        with no_grad():
             self._input.clamp_(0, 1)
 
     def _inference(self) -> Image:

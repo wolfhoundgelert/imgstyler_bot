@@ -1,26 +1,36 @@
 # https://docs.pytest.org/en/latest/
 
+# !!! Don't forget to install `pytest`: python -m pip install pytest
+
+
 from PIL import Image
 from styletransfer.styletransfer import StyleTransferInference, StyleTransferConfig
 
-def make_inference():
-    content = Image.open('../pic/img_2.png')
-    style = Image.open('../pic/img_3.png')
-    assert content.size != style.size, print("Test images should be different sizes")
-    return StyleTransferInference(StyleTransferConfig(), content, style)
 
+class Test__StyleTransferInference:
 
-# A resized image should be the same size as a ref image
-def test_StyleTransferInference_resize_image():
-    image = Image.open('../pic/img_2.png')
-    ref = Image.open('../pic/img_3.png')
-    inference = make_inference()
-    resized = inference._resize_image(image, ref)
-    assert resized.size == ref.size
+    def make_image(self, width, height):
+        return Image.new('RGB', (width, height), None)
 
+    def test__resize_image(self):
+        image = self.make_image(3, 2)
+        ref = self.make_image(2, 3)
+        inference = StyleTransferInference(None, None, None)
+        resized = inference._resize_image(image, ref)
 
-# Resized images should be the same sizes when input images are different
-def test_StyleTransferInference_prepare_images():
-    inf = make_inference()
-    inf._prepare_images()
-    assert inf._content_image.size == inf._style_image.size
+        # TEST A resized image should be the same size as a ref image
+        assert resized.size == ref.size
+
+    def test__prepare_images(self):
+        content = self.make_image(5, 6)
+        style = self.make_image(4, 3)
+        config = StyleTransferConfig(image_size=3)
+        inference = StyleTransferInference(config, content, style)
+        inference._prepare_images()
+
+        # TEST Prepared images should be the same sizes when input images are different
+        assert inference._content_image.size == inference._style_image.size
+
+        # TEST Width and height of prepared images should be not greater than config.image_size
+        assert inference._content_image.size[0] <= config.image_size and \
+               inference._content_image.size[1] <= config.image_size

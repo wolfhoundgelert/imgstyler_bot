@@ -3,3 +3,5 @@ gitignore/
 .idea/
 __pycache__/
 /source/.pytest_cache/
+/.run/
+/.venv/
