@@ -1,0 +1,37 @@
+The web pages above are mostly on Russian. You can use google translate for them - https://support.google.com/translate/answer/2534559
+
+Deploy on timeweb.com 1GB VPS server (I chose the cheapest option: ~2.7 USD a month for VPS with 3.3GHz CPU, 1GB RAM, 15 GB HHD):
+
+0. Install Bitvise SSH Client (or PUTTY) - https://www.bitvise.com/ssh-client-download
+
+1. Setup Docker on Ubuntu 22.04 - https://timeweb.cloud/tutorials/docker/kak-ustanovit-docker-na-ubuntu-22-04
+
+2. Make a swap file from HDD for supporting RAM - https://timeweb.cloud/docs/unix-guides/creating-and-resizing-swap
+
+3. Run docker with interactive terminal, auto restarting, and memory management:
+$ docker run -it --restart always --memory 1GB --memory-swap -1 gelert/repo:bot
+or with cpu limiting
+$ docker run -it --restart always --cpus 4 --memory 1GB --memory-swap -1 gelert/repo:bot
+
+Docker memory management - https://docs.docker.com/config/containers/resource_constraints/#--memory-swap-details
+
+Additional:
+- Main SSH commands - https://timeweb.com/ru/docs/obshchie-voprosy/osnovnye-komandy-ssh/#vyvod-soderjimogo-direktorii
+- https://timeweb.cloud/blog/chto-takoe-docker
+- https://timeweb.com/ru/community/articles/kak-rabotat-s-konteynerami-docker-1
+- https://timeweb.cloud/tutorials/docker/udalenie-obrazov-kontejnerov-tomov-i-seti-docker
+
+
+Docker commands:
+
+$ docker tag bot:t1 gelert/repo:bot  # prepare for pushing to the Docker hub
+$ docker push gelert/repo:tab  # push to the Docker hub
+
+$ docker ps  # docker process status
+$ docker images  # check images
+$ docker login  # login to the Docker hub
+$ docker pull gelert/repo:bot  # download from Docker hub to the server
+$ docker run -it --restart always --memory 1GB --memory-swap -1 gelert/repo:bot  # my docker run (or may be added --cpus=4 for limiting processors)
+$ docker stop %container_name_or_id%  # stop some container
+$ docker rm %image_name%  # delete image
+ 

@@ -54,6 +54,7 @@ Start the application by the `python -m imgstyler_bot` command in the terminal (
   - `imgstyler_bot.py` - the main application module, entry point for the application;
   - `test_.py` - unit tests on `pytest` framework - https://docs.pytest.org/en/latest/;
 - `Dockerfile` - Docker config;
+- `howto docker on vps.txt` - instruction for deploy your Docker container on a Virtual Private Server;
 - `requirements.txt` - configuration of needed packages;
 - `token.txt` - !!! you should put your own token on this level alongside of `source` folder !!!;
 
@@ -76,7 +77,7 @@ The bot now supports 4 algorithms that can be used for styling images:
 
 	https://github.com/zhanghang1989/PyTorch-Multi-Style-Transfer/blob/master/msgnet.ipynb
 
-	`MSGNet` is the fastest on my laptop and somtimes gives interest results, but it's also often makes some visible "brush"-patterns or fails with colors.
+	`MSGNet` is the fastest on my laptop and somtimes gives interest results, but it's also often makes some visible "brush"-patterns or fails with colors. Anyway, I chose MSGNet as a default one and the bot logo also made with it. 
 
 	<img height="400" src="pic/img_5.png"/> <img height="400" src="pic/img_4.png"/> 
 

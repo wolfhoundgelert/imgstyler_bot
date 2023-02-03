@@ -1,7 +1,8 @@
 token.txt
-gitignore/
+/gitignore/
 .idea/
 __pycache__/
-/source/.pytest_cache/
-/.run/
-/.venv/
+.pytest_cache/
+.run/
+.venv/
+/.timeweb_server/
