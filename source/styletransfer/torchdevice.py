@@ -1,3 +1,5 @@
-from torch import device, cuda
+# Hasn't support cuda yet
 
-device = device("cuda" if cuda.is_available() else "cpu")
+# from torch import device, cuda
+#
+# device = device("cuda" if cuda.is_available() else "cpu")

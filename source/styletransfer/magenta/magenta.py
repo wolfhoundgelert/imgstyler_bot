@@ -3,9 +3,12 @@
 #   https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2
 
 
-import numpy as np
-import tensorflow as tf
-import tensorflow_hub as hub
+from numpy import array, uint8, ndim
+from tensorflow.python.ops.image_ops_impl import convert_image_dtype
+from tensorflow import convert_to_tensor, newaxis, float32, constant
+from keras.backend import clear_session
+from tensorflow_hub import load
+
 from PIL import Image
 
 from styletransfer.styletransfer import \
@@ -15,7 +18,7 @@ from styletransfer.styletransfer import \
 class MagentaConfig(StyleTransferConfig):
 
     def __init__(self,
-                 image_size: int = 512,
+                 image_size: int = 256,
                  keep_content_aspect_ratio: bool = True,
                  ):
         super().__init__(image_size, keep_content_aspect_ratio)
@@ -25,25 +28,26 @@ class MagentaInference(StyleTransferInference):
 
     @staticmethod
     def _image_to_tensor(image):
-        img = tf.convert_to_tensor(image)
+        img = convert_to_tensor(image)
         # Convert image to dtype, scaling (MinMax Normalization) its values if needed.
-        img = tf.image.convert_image_dtype(img, tf.float32)
+
+        img = convert_image_dtype(img, float32)
         # Scale the image using the custom function we created
 
         # Adds a fourth dimension to the Tensor because the model requires a 4-dimensional Tensor
-        img = img[tf.newaxis, :]
+        img = img[newaxis, :]
         return img
 
     @staticmethod
     def _tensor_to_image(tensor):
         tensor = tensor * 255
-        tensor = np.array(tensor, dtype=np.uint8)
-        if np.ndim(tensor) > 3:
+        tensor = array(tensor, dtype=uint8)
+        if ndim(tensor) > 3:
             assert tensor.shape[0] == 1
             tensor = tensor[0]
         return Image.fromarray(tensor)
 
-    _hub_module = hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
+    _hub_module = load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
 
     def __init__(self, config: MagentaConfig, content_image: Image, style_image: Image):
         super().__init__(config, content_image, style_image)
@@ -53,9 +57,9 @@ class MagentaInference(StyleTransferInference):
         content = MagentaInference._image_to_tensor(self._content_image)
         style = MagentaInference._image_to_tensor(self._style_image)
 
-        tf.keras.backend.clear_session()  # There were some issues with colors without this code
+        clear_session()  # There were some issues with colors without this code
 
-        result = MagentaInference._hub_module(tf.constant(content), tf.constant(style))[0]
+        result = MagentaInference._hub_module(constant(content), constant(style))[0]
         return MagentaInference._tensor_to_image(result)
 
 
