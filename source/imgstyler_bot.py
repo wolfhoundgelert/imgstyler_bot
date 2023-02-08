@@ -1,7 +1,5 @@
 import logging
-import threading
-from multiprocessing import Manager, Process
-from os import getpid
+from multiprocessing import Process
 from telegram import Update
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes
 from io import BytesIO
@@ -14,20 +12,36 @@ from styletransfer.styletransfer import StyleTransferType, StyleTransfer, StyleT
 class InferenceWorker:
 
     @staticmethod
-    def get_worker(style_transfer: StyleTransfer, pid_to_result,
+    def get_worker(token: str, chat_id: int, style_transfer: StyleTransfer,
                    content_image: Image, style_image: Image, config: StyleTransferConfig = None):
 
         inference = style_transfer.get_inference(content_image, style_image, config)
-        worker = InferenceWorker(pid_to_result, inference)
+        worker = InferenceWorker(token, chat_id, inference)
         return worker
 
-    def __init__(self, pid_to_result, inference: StyleTransferInference):
-        self._pid_to_result = pid_to_result
+    def __init__(self, token: str, chat_id: int, inference: StyleTransferInference):
+        self._token = token
+        self._chat_id = chat_id
         self._inference = inference
+
+    def _send_result_message(self, result_image):
+        bio = BytesIO()
+        result_image.save(bio, 'JPEG')
+        bio.seek(0)
+
+        api_url = f'https://api.telegram.org/bot{self._token}/sendPhoto?chat_id={self._chat_id}'
+        files = {"photo": bio}
+
+        try:
+            response = post(api_url, files=files)
+            print(f"Response: {response.text}")
+        except Exception as e:
+            print(f"Exception: {e}")
 
     # Defining __call__ method
     def __call__(self):
-        self._pid_to_result[getpid()] = self._inference()
+        result_image = self._inference()
+        self._send_result_message(result_image)
 
 
 class Application:
@@ -37,8 +51,6 @@ class Application:
         # style transfer part:
         self._style_transfer_type = style_transfer_type
         self._user_id_to_first_image = {}  # dict for saving the first photo from a user (we need 2 photos)
-        self._pid_to_result = Manager().dict()  # dict for saving results via multiprocessing
-        self._pid_to_chat_id = {}  # dict for saving chat id via multiprocessing for sending results back to users
         self._style_transfer = self._build_style_transfer()
 
         # telegram bot part:
@@ -83,38 +95,6 @@ class Application:
         bot.run_polling()
         return bot
 
-    def _check_results(self):
-        for pid in self._pid_to_result.keys():
-
-            try:  # TODO Sometimes failed with KeyError only in the Docker containers (pops pid from empty keys list)
-                result = self._pid_to_result.pop(pid)
-            except:
-                pass
-
-            chat_id = self._pid_to_chat_id.pop(pid)
-            self._send_image_to_chat(result, chat_id)
-
-        if len(self._pid_to_result.keys()) or len(self._pid_to_chat_id.keys()):
-            self._start_timer()
-
-    def _start_timer(self):
-        threading.Timer(1, self._check_results).start()
-
-
-    def _send_image_to_chat(self, result, chat_id):
-        bio = BytesIO()
-        result.save(bio, 'JPEG')
-        bio.seek(0)
-
-        api_url = f'https://api.telegram.org/bot{self._token}/sendPhoto?chat_id={chat_id}'
-        files = {"photo": bio}
-
-        try:
-            response = post(api_url, files=files)
-            print(f"Response: {response.text}")
-        except Exception as e:
-            print(f"Exception: {e}")
-
     async def _on_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         txt = ("Hi! I'm Image Styler. Send me 2 photos. I'll take the content from the first one and the style from "
                "the second one. Then I'll generate a new image with the taken content in the taken style and send it"
@@ -151,14 +131,11 @@ class Application:
             content_image = self._user_id_to_first_image.pop(chat_id)
             style_image = img
 
-            inference_worker = InferenceWorker.get_worker(
-                self._style_transfer, self._pid_to_result, content_image, style_image)
+            inference_worker = InferenceWorker.get_worker(self._token, chat_id,
+                self._style_transfer, content_image, style_image)
 
             p = Process(target=inference_worker)
             p.start()
-            self._pid_to_chat_id[p.pid] = chat_id
-
-            self._start_timer()
 
 
 if __name__ == '__main__':
