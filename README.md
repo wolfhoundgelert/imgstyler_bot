@@ -35,6 +35,8 @@ I implemented a telegram bot which gets 2 images from a user, uses them as a con
 
 Users can send those 2 images one after another or together. The order of sent images is meaningful - the first one is a content and the second one is a style. For example, the first image - a photo of your beloved dog or cat, the second one - an artwork of Picasso, and the result image will be a photo of your dog or cat as kind of artwork in the style of Picasso.
 
+***The bot was deployed on a paid host and is now turned off so as not to pay for hosting.***
+
 ### How to
 It’s an educational project, but it’s in production-ready state - you can deploy it on a local machine or your web server, register your own telegram bot and receive the token (https://core.telegram.org/bots/features#botfather), create a `token.txt` file and copy the token there, and put the file to the project root folder. File `requirements.txt` contains info about using packages you need to install to your environment.
 
